@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dashboard</title>
+  </head>
+  <body>
+    <div class="page">
+      <div class="greeting"></div>
+      <div class="todoapp">
+        <input
+          type="text"
+          placeholder="What do you want to do today?"
+          id="task"
+        />
+        <button onclick="addtask()">New task</button>
+        <div class="output"></div>
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+  let todoDatabase = []
+
+  function display() {
+      let output = document.getElementById('output')
+      output.innerHTML = ''
+      for (let i = 0; i < todoDatabase.length; i++) {
+          output.innerHTML += `
+            <div class="S/N"> ${i +1}</div>
+            <div class="content">${task.value.trim()}</div>
+            <div class="buttons">
+                <button onclick='editContent("todoText-${i}")' type="button" class="btn btn-success">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button onclick='removeContent("todoItem-${i}")' type="button" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+          `
+
+      }
+  }
+
+  function addtask() {
+      let task = document.getElementById("task").value.trim()
+      document.getElementById('task') =""
+
+      if (!task) {
+          alert('What would you like to do today?😊')
+      } else {
+        todoDatabase.push(task.value.trim())
+        
+      }
+  }
+</script>
