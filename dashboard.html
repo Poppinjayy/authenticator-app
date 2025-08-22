@@ -3,11 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://kit.fontawesome.com/a5db12f1a3.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
     <title>dashboard</title>
+    <style>
+      body {
+        font-family: "Poppins";
+        color: #ccd0cf;
+      }
+      .page {
+        background: linear-gradient(
+          90deg,
+          rgb(2, 16, 36, 0.9),
+          rgb(2, 16, 36, 0.7)
+        );
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+      }
+      .backg {
+        transform: rotate(270deg);
+        top: -300px !important;
+        left: 300px;
+        object-fit: cover ;
+        z-index: -1;
+        width: 56.5%;
+        
+        /* width: 100%;
+        height: 100%; */
+      }
+      img {
+        position: absolute;
+      }
+      .img1 {
+        bottom: -75px;
+        right: 100px;
+        width: 300px;
+      }
+      .img2 {
+        left: 0;
+        bottom: 0;
+        width: 180px;
+        height: auto;
+      }
+      .img3 {
+        top: -10px;
+        right: -30px;
+        width: 180px;
+        height: auto;
+      }
+      input {
+        background-color: transparent;
+        color: white !important;
+        font-weight: 500;
+        padding: 1px 10px 0px;
+        width: 20vw;
+        outline: none;
+        border: none;
+        text-transform: capitalize;
+        border: 1px solid rgb(204, 208, 207, 0.4);
+        border-radius: 15px;
+        width: 25vw;
+        height: 45px;
+      }
+      .greeting {
+        font-size: 50px;
+        margin-top: 50px !important;
+        margin-bottom: 30px !important;
+      }
+      #output {
+        background-color: rgb(5, 38, 89, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgb(193, 232, 255, 0.2);
+        border-radius: 12px;
+        width: 40vw;
+        min-height: 40vh;
+        margin-top: 1vw;
+      }
+      .content {
+        width: 27vw;
+        text-align: left !important;
+        text-transform: capitalize;
+      }
+      .button {
+        position: absolute;
+        left: 48%;
+        bottom: 20px;
+      }
+    </style>
   </head>
   <body>
-    <div class="page">
-      <div class="greeting"></div>
+    <div class="page text-center">
+      <!-- <img
+        src="./media/3458adbe3279bc2c5163110a3b051e60-removebg-preview.png"
+        alt=""
+        class="img1"
+      /> -->
+      <img
+        src="https://i.pinimg.com/736x/7f/90/d1/7f90d17a2b0104a0fecff8f60e447854.jpg"
+        alt=""
+        class="backg"
+      />
+      <img
+        src="./media/db1670edfb654f9e573f1ce74a373a14-removebg-preview.png"
+        alt=""
+        class="img2"
+      />
+      <img
+        src="./media/b334cfb1fc55090377fe088355808b98-removebg-preview.png"
+        alt=""
+        class="img3"
+      />
+      <div class="greeting fs-1 fw-semibold">
+        Any plans for today, <span id="username"></span>?
+      </div>
       <div class="todoapp">
         <input
           type="text"
@@ -15,43 +141,83 @@
           id="task"
         />
         <button onclick="addtask()">New task</button>
-        <div class="output"></div>
+
+        <div id="output" class="mx-auto"></div>
+      </div>
+      <div class="button">
+        <button onclick="logout()">Logout</button>
       </div>
     </div>
   </body>
 </html>
 <script>
-  let todoDatabase = []
+  let database = JSON.parse(localStorage.getItem("users")) || [];
+  let currentUserIndex = JSON.parse(localStorage.getItem("authUserIndex"));
+  let currentUser = database[currentUserIndex];
+  // let todoDatabase = currentUser.todoDatabase || "";
 
-  function display() {
-      let output = document.getElementById('output')
-      output.innerHTML = ''
-      for (let i = 0; i < todoDatabase.length; i++) {
-          output.innerHTML += `
-            <div class="S/N"> ${i +1}</div>
-            <div class="content">${task.value.trim()}</div>
-            <div class="buttons">
-                <button onclick='editContent("todoText-${i}")' type="button" class="btn btn-success">
-                    <i class="fa-regular fa-pen-to-square"></i>
-                </button>
-                <button onclick='removeContent("todoItem-${i}")' type="button" class="btn btn-danger">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-          `
-
-      }
+  function checkUserAuth() {
+    console.log(currentUser, currentUserIndex);
+    if (!currentUser) {
+      document.body.innerHTML = "";
+      alert("Unauthorised User, please sign up");
+      window.location.href = "signUp.html";
+    }
   }
+  checkUserAuth();
+
+  function displayUsername() {
+    let username = document.getElementById("username");
+    username.innerHTML = currentUser.name;
+  }
+  displayUsername();
+
+  function displayTask() {
+    let output = document.getElementById("output");
+    output.innerHTML = "";
+    for (let i = 0; i < currentUser.todoDatabase.length; i++) {
+      output.innerHTML += `
+    <div class="displayCon mx-auto d-flex justify-content-between align-items-center mt-3">
+      <div class="S/N ms-3 fs-3"> ${i + 1}.</div>
+      <div class="content ms-3 fs-3">${currentUser.todoDatabase[i]}</div>
+      <div class="buttons">
+          <button onclick='editContent("todoText-${
+            i + 1
+          }")' type="button" class="btn btn-success">
+              <i class="fa-regular fa-pen-to-square"></i>
+          </button>
+          <button onclick='removeContent("todoItem-${
+            i + 1
+          }")' type="button" class="btn btn-danger me-3 ms-1 ">
+              <i class="fa-solid fa-trash"></i>
+          </button>
+      </div>
+    </div>
+      
+          `;
+    }
+  }
+  displayTask();
 
   function addtask() {
-      let task = document.getElementById("task").value.trim()
-      document.getElementById('task') =""
+    let task = document.getElementById("task").value.trim();
+    console.log(task);
 
-      if (!task) {
-          alert('What would you like to do today?😊')
-      } else {
-        todoDatabase.push(task.value.trim())
-        
-      }
+    if (!task) {
+      alert("What would you like to do today?😊");
+    } else {
+      currentUser.todoDatabase.push(task);
+      database[currentUserIndex] = currentUser
+      localStorage.setItem('users', JSON.stringify(database))
+      displayTask();
+    }
+    document.getElementById("task").value = "";
+    console.log(todoDatabase);
+  }
+
+  function logout() {
+    localStorage.removeItem("authUserIndex");
+    alert("Logout successful");
+    window.location.href = "login.html";
   }
 </script>

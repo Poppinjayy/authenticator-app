@@ -141,6 +141,9 @@
         outline: none;
         border: none;
       }
+      #username, #firstname, #lastname{
+        text-transform: capitalize;
+      }
       .input:focus {
         outline: 1px solid #052659;
         background-color: transparent;
@@ -199,26 +202,26 @@
       <img
         src="./media/14fdc495bcdd511d79328965d3efa3b5-removebg-preview.png"
         class="side-img"
-        alt=""
+        alt="happy boy"
       />
       <h1 class="title d-block mt-3">Create <br />new account.</h1>
       <div class="form">
         <form class="shadow-lg">
           <div class="mt-3 two">
             <div class="input">
-              <label for="username">Firstname</label>
-              <input type="text" id="firstname" />
+              <label for="firstname">Firstname</label>
+              <input type="text" id="firstname" oninput="capFirstVal()" />
               <span class="material-symbols-outlined"> badge </span>
             </div>
             <div class="input">
-              <label for="username">Lastname</label>
-              <input type="text" id="lastname" />
+              <label for="lastname">Lastname</label>
+              <input type="text" id="lastname" oninput="capFirstVal()" />
               <span class="material-symbols-outlined"> badge </span>
             </div>
           </div>
           <div class="mt-3 input">
             <label for="username">Username</label>
-            <input type="text" id="username" />
+            <input type="text" id="username" oninput="capFirstVal()" />
             <span class="material-symbols-outlined"> person </span>
           </div>
           <div class="mt-3 input">
@@ -231,8 +234,8 @@
             <input type="password" id="password" />
             <span
               class="material-symbols-outlined"
-              onmousedown="showPassword()"
-              onmouseleave="hidePassword()"
+              onclick="togglePassword('password', true)"
+              ondblclick="togglePassword('password', false)"
             >
               visibility
             </span>
@@ -242,9 +245,8 @@
             <input type="password" id="confirmPassword" />
             <span
               class="material-symbols-outlined"
-              onmousedown="showPassword()"
-              onmouseup="hidePassword()"
-              onmouseleave="hidePassword()"
+              onclick="togglePassword('confirmPassword', true)"
+              ondblclick="togglePassword('confirmPassword', false)"
             >
               visibility
             </span>
@@ -276,8 +278,8 @@
           aria-atomic="true"
         >
           <div class="toast-header">
-            <strong class="me-auto">mine-todo</strong>
-            <small>2 secs ago</small>
+            <strong class="me-auto fs-2">mine-todo</strong>
+            <small>1 sec ago</small>
             <button
               type="button"
               class="btn-close"
@@ -285,7 +287,7 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="toast-body">Sign Up successful</div>
+          <div class="toast-body fs-6">Sign Up successful</div>
         </div>
       </div>
 
@@ -305,28 +307,22 @@
 <script>
   let database = JSON.parse(localStorage.getItem("users")) || [];
 
-  // function displayTable() {
-  //   tbody.innerHTML = "";
-  //   database.forEach(function (userObject, i) {
-  //     tbody.innerHTML += `
-  //               <tr>
-  //                   <td>${i + 1}</td>
-  //                   <td>${userObject.name}</td>
-  //                   <td>${userObject.email}</td>
-  //                   <td>${userObject.password}</td>
-  //                   <td>${userObject.terms ? "agreed" : "not agreed"} </td>
-  //               </tr>`;
-  //   });
-  // }
-  // displayTable();
+  function capFirstVal(str) {
+    if (!str) {
+      return "";
+    }
+    return str[0].toUpperCase() + str.slice(1);
+  }
+  capFirstVal();
 
   function signUp() {
+    let myfirstname = capFirstVal(firstname.value.trim());
+    let mylastname = capFirstVal(lastname.value.trim());
+    let myUsername = capFirstVal(username.value.trim());
     let myPassword = password.value.trim();
     let myConfirmPassword = confirmPassword.value.trim();
-    let myfirstname = firstname.value.trim();
-    let mylastname = lastname.value.trim();
-    let myUsername = username.value.trim();
     let myEmail = email.value.trim();
+    let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&]).+$/;
 
     if (
       !myfirstname ||
@@ -345,19 +341,36 @@
       })
     ) {
       alert("User already exist");
+    } else if (
+      database.find((userObject) => {
+        return userObject.name === myUsername;
+      })
+    ) {
+      alert("Username already exist");
     } else if (myPassword.length < 8) {
-      alert("Password should be at least * characters");
+      alert("Password should be at least 8 characters");
+    } else if (!regex.test(myPassword)) {
+      alert(
+        "Password must contain at least one uppercase letter, one number, and one special character."
+      );
     } else if (myPassword !== myConfirmPassword) {
       alert("Password does not match");
     } else {
       let userObject = {
+        firstname: myfirstname,
+        lastname: mylastname,
         name: myUsername,
         email: myEmail,
         password: myPassword,
         terms: terms.checked,
+        todoDatabase: [],
       };
+
       database.push(userObject);
       localStorage.setItem("users", JSON.stringify(database));
+      let toastSuccess = document.getElementById("liveToast");
+      let toast = new bootstrap.Toast(toastSuccess);
+      toast.show();
       // displayTable();
       // alert("Sign Up successful");
       setTimeout(() => {
@@ -366,26 +379,21 @@
     }
   }
 
-  function showPassword() {
-    document.getElementById("password").type = "text";
-    document.getElementById("confirmPassword").type = "text";
-  }
-  function hidePassword() {
-    document.getElementById("password").type = "password";
-    document.getElementById("confirmPassword").type = "password";
+  function togglePassword(id, show) {
+    document.getElementById(id).type = show ? "text" : "password";
   }
   let myPassword = password.value.trim();
   let myConfirmPassword = confirmPassword.value.trim();
   const toastTrigger = document.getElementById("liveToastBtn");
   const toastLiveExample = document.getElementById("liveToast");
 
-  if (toastTrigger) {
-    const toastBootstrap =
-      bootstrap.Toast.getOrCreateInstance(toastLiveExample);
-    toastTrigger.addEventListener("click", () => {
-      toastBootstrap.show();
-    });
-  }
+  // if (toastTrigger) {
+  //   const toastBootstrap =
+  //     bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+  //   toastTrigger.addEventListener("click", () => {
+  //     toastBootstrap.show();
+  //   });
+  // }
 
   //     let buttonTag = document.getElementById('buttonTag')
   //   setTimeout(function () {
@@ -402,4 +410,19 @@
   //         buttonTag.disable = true
   //     }, 3000)
   // }
+
+  // function displayTable() {
+  //   tbody.innerHTML = "";
+  //   database.forEach(function (userObject, i) {
+  //     tbody.innerHTML += `
+  //               <tr>
+  //                   <td>${i + 1}</td>
+  //                   <td>${userObject.name}</td>
+  //                   <td>${userObject.email}</td>
+  //                   <td>${userObject.password}</td>
+  //                   <td>${userObject.terms ? "agreed" : "not agreed"} </td>
+  //               </tr>`;
+  //   });
+  // }
+  // displayTable();
 </script>

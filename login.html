@@ -62,6 +62,7 @@
         width: fit-content;
         margin: auto;
         margin-top: 0vw;
+        text-align: center !important;
       }
       label {
         display: block;
@@ -80,8 +81,9 @@
         margin-left: 30px;
         margin-right: 30px;
         position: relative;
+        text-align: left;
       }
-      span{
+      span {
         position: absolute;
         top: 12px;
         right: 7px;
@@ -94,6 +96,7 @@
         width: 20vw;
         outline: none;
         border: none;
+        text-transform: capitalize;
       }
       .terms {
         display: flex;
@@ -112,7 +115,7 @@
       }
       .login {
         /* margin: -20px 120px; */
-        margin-left: 78px;
+        /* margin-left: 78px; */
         margin-bottom: 20px;
         padding: 10px 90px !important;
         font-size: 20px !important;
@@ -140,6 +143,7 @@
         margin-left: 54vw;
         font-size: 13px;
       }
+      
     </style>
   </head>
   <body>
@@ -158,25 +162,24 @@
       <div class="form">
         <form action="">
           <div class="input mt-4">
-            <label for="Username">Username</label>
-            <input type="text" id="username" />
+            <label for="username">Username</label>
+            <input type="text" id="username" oninput="capFirstVal()"/>
             <span class="material-symbols-outlined"> person </span>
           </div>
           <div class="input mt-3">
-            <label for="Password">Password</label>
+            <label for="password">Password</label>
             <input type="password" id="password" />
             <span
               class="material-symbols-outlined"
-              onmousedown="showPassword()"
-              onmouseup="hidePassword()"
-              onmouseleave="hidePassword()"
+              onclick="togglePassword('password', true)"
+              ondblclick="togglePassword('password', false)"
             >
               visibility
             </span>
           </div>
           <div class="mt-3 mb-3 terms">
-            <input type="checkbox" id="remeber" />
-            <label for="Remember">Remember me?</label>
+            <input type="checkbox" id="remember" />
+            <label for="remember">Remember me?</label>
           </div>
 
           <button
@@ -187,7 +190,7 @@
           >
             Login
           </button>
-          <div class="toast-container position-fixed top-0 end-0 p-3">
+          <!-- <div class="toast-container position-fixed top-0 end-0 p-3">
             <div
               id="liveToast"
               class="toast"
@@ -205,46 +208,66 @@
                   aria-label="Close"
                 ></button>
               </div>
-              <div class="toast-body">Login successful</div>
+              <div class="toast-body">Login successful!</div>
             </div>
+          </div> -->
         </form>
       </div>
       <p class="signup">Not a member? <a href="./signUp.html">Signup</a></p>
-      </div>
     </div>
   </body>
 </html>
 <script>
-  let database = JSON.parse(localStorage.getItem("userObject")) || [];
+  let database = JSON.parse(localStorage.getItem("users")) || [];
+
+function capFirstVal(str) {
+    if (!str) {
+      return "";
+    }
+    return str[0].toUpperCase() + str.slice(1);
+  }
+  capFirstVal();
 
   function login() {
-    let username = document.getElementById("username").value.trim();
+    let username = capFirstVal(document.getElementById("username").value.trim());
+    console.log(username);
+    
     let password = document.getElementById("password").value.trim();
+    console.log(password);
+    
+    let foundUser = database.find((users) => {
+      return users.name === username;
+    });
 
     if (!username || !password) {
       alert("All fields are mandatory");
-    } else if (
-      !username ===
-      database.find((userObject) => {
-        return (
-          userObject.name === myUsername && userObject.password === myPassword
-        );
-      })
-    ) {
-      alert("Invalid username or password");
+    } else if (!foundUser) {
+      alert("Invalid user, please Sign Up");
+      console.log(foundUser);
+      // window.location.href = "signUp.html";
+    } else if (foundUser.password !== password) {
+      return alert("Invalid username or password");
     } else {
-      alert("login successful");
+      console.log(foundUser);
+
+      let buttonTag = document.getElementById("liveToastBtn");
+      buttonTag.innerHTML = "Loading...";
+      buttonTag.disabled = true;
+      // alert("login successful");
+      let currentUserIndex = database.findIndex((users) => {
+        return users.name === username;
+      });
+      console.log(currentUserIndex);
+      localStorage.setItem("authUserIndex", currentUserIndex);
+
       setTimeout(() => {
+        buttonTag.innerHTML = "Login";
+        buttonTag.disabled = false;
         window.location.href = "dashboard.html";
       }, 2000);
     }
   }
-  function showPassword() {
-    document.getElementById('password').type = 'text'
-    document.getElementById('confirmPassword').type = 'text'
-  }
-  function hidePassword() {
-    document.getElementById('password').type = 'password'
-    document.getElementById('confirmPassword').type = 'password'
+  function togglePassword(id, show) {
+    document.getElementById(id).type = show ? "text" : "password";
   }
 </script>
